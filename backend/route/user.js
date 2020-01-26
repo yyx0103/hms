@@ -15,24 +15,16 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/login').get((req, res) => {
-    const uid = req.body.username;
-    const pswd = req.body.password;
-    User.findOne({username: uid}, (err, user) => {
+    User.findOne({username: req.body.username}, (err, user) => {
         if (err) {
             res.status(400).json("Error!");
         } else {
-            user.comparePassword(pswd, (err, isMatch) => {
+            user.comparePassword(req.body.password, (err, isMatch) => {
                 if (err) res.status(400).json("Error!");
                 if (!isMatch) res.status(401).json("Password Not Correct");
-                let token = jsonwebtoken.sign({username: uid}, 
-                                              'yyx is always being correct', 
-                                              {algorithm: 'HS256',
-                                               expiresIn: 129600});
-                res.json({
-                    success: true, 
-                    err: null, 
-                    token
-                });
+                let token = jsonwebtoken.sign({username: req.body.username}, 'yyx is always being correct', 
+                                              {algorithm: 'HS256', expiresIn: 129600});
+                res.json({success: true, err: null, token});
             });
         }
     });
