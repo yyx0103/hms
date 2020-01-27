@@ -14,19 +14,26 @@ import axios from 'axios';
 export const Auth = {
   isAuthenticated: false,
   token: '',
+  isServer: false,
   async authenticate(userinfo, next) { // {params: {username: userinfo.username, password: userinfo.password}}
-    let res = await axios.get('http://localhost:5000/user/login', {headers: userinfo})
-    if (res.data.success) {
-      this.token = res.data.token;
-      this.isAuthenticated = true;
-    } else {
+    await axios.get('http://localhost:5000/user/login', {headers: userinfo}).then((res) => {
+      if (res.data.success) {
+        this.token = res.data.token;
+        this.isAuthenticated = true;
+        for (var a = 0; a < 1000; a++) console.log(res.data.isServer);
+        this.isServer = res.data.role;
+      } else {
+        this.isAuthenticated = false;
+      }
+      if (this.isAuthenticated) {
+        next(true);
+      } else {
+        next(false);
+      }
+    }).catch((err) => {
       this.isAuthenticated = false;
-    }
-    if (this.isAuthenticated) {
-      next(true);
-    } else {
       next(false);
-    }
+    })
   },
   signout(next) {
     this.isAuthenticated = false;
@@ -116,12 +123,14 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 export const AuthButton = withRouter(({ history }) => (
   Auth.isAuthenticated ? (
     <p>
-      Welcome! <button onClick={() => {
+      <Button onClick={() => {
         Auth.signout(() => history.push('/login'))
-      }}>Sign out</button>
+      }}>Sign out</Button>
     </p>
   ) : (
-    <p>You are not logged in.</p>
+    <Button onClick={() => {
+      history.push('/login')
+    }}>Login</Button>
   )
 ))
 
@@ -134,7 +143,8 @@ function App() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={CreateAccount} />
       <PrivateRoute path="/campus" component={CampusList} />
-      <PrivateRoute path="/issue" component={Issue} />
+      <PrivateRoute path="/issue" exact component={Issue} />
+      <PrivateRoute path="/issue/:id" component={Issue} />
       <Route path="/" exact component={Login} />
      </div>
    </Router>

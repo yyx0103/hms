@@ -48,7 +48,8 @@ router.route('/issue').delete((req, res) => {
 
 router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
-        if (!err && doc.isServer) {
+        if (!err) {
+            if (!doc.isServer) delete req.body.newData.status;
             Campus.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.body.id)}, {$set: req.body.newData}, {useFindAndModify: false})
                   .then((doc) => {
                       Campus.findOne({_id: doc._id}).then((doc) => {res.json(doc)})

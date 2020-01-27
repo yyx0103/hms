@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import "react-datepicker/dist/react-datepicker.css";
-import ToggleButton from 'react-bootstrap/ToggleButton';
+import { Auth } from '../App'
 
 export default class CreateAccount extends Component {
   constructor(props) {
@@ -46,14 +46,14 @@ export default class CreateAccount extends Component {
     });
   }
 
-  onSubmit(e) {
+  async onSubmit(e) {
     e.preventDefault();
-
-    axios({method: 'post', url: 'http://localhost:5000/user/signup', 
+    await axios({method: 'post', url: 'http://localhost:5000/user/signup', 
            data: {'username': this.state.username, 'password': this.state.password, 'isServer': this.state.isServer}, 
       headers: {'Content-Type': 'application/json'}
-    });
-    window.location = '/issue';
+    }).then(async (doc) => {
+      await Auth.authenticate(() => {});
+    }).catch((err) => {});
   }
 
   render() {
@@ -82,8 +82,8 @@ export default class CreateAccount extends Component {
           <div className='form-group'>
               <label>Account Type</label>
               <select value={this.state.isServer} onChange={this.onChangeIsServer}>
-                <option selected value="false">Service Provider</option>
-                <option value="true">User</option>
+                <option selected value="true">Service Provider</option>
+                <option value="false">User</option>
               </select>
           </div>
           <div className="form-group">

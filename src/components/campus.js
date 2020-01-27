@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from '@material-ui/core/Link';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Auth } from '../App';
 
@@ -8,9 +8,10 @@ const Campus = (props) => (
       <td>{props.campus.title}</td>
       <td>{props.campus.course}</td>
       <td>{props.campus.description}</td>
+      <td>{props.campus.status}</td>
       <td>{props.campus.dateDue.substring(0,10)}</td>
       <td>
-        <Link to={"/edit/"+props.campus._id}>edit</Link> | <a href="#" onClick={() => { props.deleteCampus(props.campus._id) }}>delete</a>
+        <Link to={"/issue/"+props.campus._id}>edit</Link> | <a href="#" onClick={() => { props.deleteCampus(props.campus._id) }}>delete</a>
       </td>
     </tr>
 )
@@ -25,20 +26,19 @@ export default class CampusList extends React.Component {
     }
   
     async componentDidMount() {
-      let response = await axios.get('http://localhost:5000/campus/', { headers: { Authorization: 'Bearer ' +  Auth.token } })
+      let response = await axios.get('http://localhost:5000/campus/', { headers: { Authorization: 'Bearer ' +  Auth.token } }).catch((err) => {})
       this.setState({ campus: response.data })
     }
   
-    deleteCampus(cid) {
-      axios.delete('http://localhost:5000/campus/issue', {
+    async deleteCampus(cid) {
+      await axios.delete('http://localhost:5000/campus/issue', {
         headers: {
           Authorization: 'Bearer ' + Auth.token
         },
         data: {
           id: cid
         }
-      })
-        .then(response => { console.log(response.data)});
+      }).then(response => { console.log(response.data)});
   
       this.setState({
         campus: this.state.campus.filter(el => el._id !== cid)
@@ -61,6 +61,7 @@ export default class CampusList extends React.Component {
                 <th>Title</th>
                 <th>Subject</th>
                 <th>Description</th>
+                <th>Status</th>
                 <th>Due Date</th>
                 <th>Action</th>
               </tr>

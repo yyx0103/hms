@@ -16,8 +16,6 @@ const LinkButton = ({ history, location, match, staticContext, to, onClick, ...r
   )
 }
 
-
-
 LinkButton.propTypes = {
   to: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired

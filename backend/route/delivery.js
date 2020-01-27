@@ -34,7 +34,8 @@ router.route('/issue').post((req, res) => {
 
 router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
-        if (!err && doc.isServer) {
+        if (!err) {
+            if (!doc.isServer) delete req.body.newData.status;
             Delivery.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.body.id)}, {$set: req.body.newData}, {useFindAndModify: false})
                     .then((doc) => {
                         Delivery.findOne({_id: doc._id})
