@@ -50,7 +50,10 @@ router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
         if (!err) {
             if (!doc.isServer) delete req.body.newData.status;
-            Campus.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.body.id)}, {$set: req.body.newData}, {useFindAndModify: false})
+            let query = {};
+            if (!doc.isServer) query = {_id: new mongoose.Types.ObjectId(req.body.id), username: doc.username};
+            else query = {_id: new mongoose.Types.ObjectId(req.body.id)};
+            Campus.findOneAndUpdate(query, {$set: req.body.newData}, {useFindAndModify: false})
                   .then((doc) => {
                       Campus.findOne({_id: doc._id}).then((doc) => {res.json(doc)})
                                .catch((err) => {res.status(400).json(err)});
