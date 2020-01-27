@@ -15,12 +15,17 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/login').get((req, res) => {
-    User.findOne({username: req.body.username}, (err, user) => {
+    if (!req.headers.username || !req.headers.password) {
+        res.status(400).json("bad request");
+        return
+    }
+    User.findOne({username: req.headers.username}, (err, user) => {
         if (!err) {
-            user.comparePassword(req.body.password, (err, isMatch) => {
+            user.comparePassword(req.headers.password, (err, isMatch) => {
                 if (err) res.status(400).json(err);
                 if (!isMatch) res.status(401).json("Password Not Correct");
-                let token = jsonwebtoken.sign({username: req.body.username}, process.env.AXIOM_IV, {algorithm: 'HS256', expiresIn: 129600});
+                console.log(isMatch)
+                let token = jsonwebtoken.sign({username: req.headers.username}, process.env.AXIOM_IV, {algorithm: 'HS256', expiresIn: 129600});
                 res.json({success: true, err: null, token});
             });
         } else {
@@ -30,7 +35,7 @@ router.route('/login').get((req, res) => {
 });
 
 router.route('/signup').post((req, res) => {
-
+    console.log(req.body)
     new User(req.body).save(function(err, doc) {
         if (err) res.status(400).json(err);
         else res.status(500).json(doc);

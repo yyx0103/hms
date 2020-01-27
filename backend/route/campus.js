@@ -32,6 +32,20 @@ router.route('/issue').post((req, res) => {
     });
 });
 
+router.route('/issue').delete((req, res) => {
+    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+        if (!err && !doc.isServer) {
+            Campus.findOneAndRemove({_id: new mongoose.Types.ObjectId(req.body.id), username: doc.username})
+                  .then((doc) => {
+                      res.json(doc);
+                  })
+                  .catch((err) => {res.status(400).json(err)});
+        } else {
+            res.status(400).json(err);
+        }
+    });
+});
+
 router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
         if (!err && doc.isServer) {
