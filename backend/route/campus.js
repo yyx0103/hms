@@ -25,8 +25,7 @@ router.route('/issue').post((req, res) => {
     let newCampus = new Campus(req.body);
     newCampus.username = jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username;
     newCampus.status = 'issued';
-    if (!newCampus.dateExpect)
-        newCampus.dateExpect = new Date();
+    if (!newCampus.dateDue) newCampus.dateDue = new Date();
     newCampus.save((err, doc) => {
         if (err) res.status(400).json(err);
         else res.json(doc);
@@ -35,7 +34,6 @@ router.route('/issue').post((req, res) => {
 
 router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
-        console.log(doc.isServer)
         if (!err && doc.isServer) {
             Campus.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.body.id)}, {$set: req.body.newData}, {useFindAndModify: false})
                   .then((doc) => {
@@ -47,7 +45,6 @@ router.route('/issue').put((req, res) => {
             res.status(400).json(err);
         }
     });
-    console.log(req.body.id)
 });
 
 module.exports = router;
