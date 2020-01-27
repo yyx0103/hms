@@ -15,14 +15,18 @@ const deliverySchema = new Schema({
         type: String, 
         required: true
     },
-    dateIssued: {
+    dateExpect: {
         type: Date, 
+        required: true
+    }, 
+    status: {
+        type: String, 
         required: true
     }
 }, {
     timestamps: true,
 });
 
-const Delivery = mongoose.model('Campus', deliverySchema);
+const Delivery = mongoose.model('Delivery', deliverySchema);
 
 module.exports = Delivery;

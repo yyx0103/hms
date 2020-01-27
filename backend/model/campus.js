@@ -19,13 +19,13 @@ const campusSchema = new Schema({
         type: String, 
         required: true
     },
-    dateIssued: {
-        type: Date, 
-        required: true
-    },
     dateDue: {
         type: Date, 
         required: false 
+    },
+    status: {
+        type: String, 
+        required: true
     }
 }, {
     timestamps: true,

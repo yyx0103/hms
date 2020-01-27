@@ -15,12 +15,17 @@ const UserSchema = new Schema({
     password: {
         type: String, 
         required: true
+    }, 
+    isServer: {
+        type: Boolean, 
+        required: true
     }
 });
 
 UserSchema.pre('save', function(next) {
     var user = this;
-    if (!user.isModified('password')) return next();
+    if (!user.isModified('password'))
+        return next({description: 'password could not be reset'});
     bcrypt.hash(user.password, 10, function(err, hash) {
         if (err) return next(err);
         user.password = hash;

@@ -11,34 +11,29 @@ router.route('/').get((req, res) => {
             });
             res.json(users);
         })
-        .catch(err => res.status(400).json('Error: ' + err));
+        .catch(err => res.status(400).json(err));
 });
 
 router.route('/login').get((req, res) => {
     User.findOne({username: req.body.username}, (err, user) => {
-        if (err) {
-            res.status(400).json("Error!");
-        } else {
+        if (!err) {
             user.comparePassword(req.body.password, (err, isMatch) => {
-                if (err) res.status(400).json("Error!");
+                if (err) res.status(400).json(err);
                 if (!isMatch) res.status(401).json("Password Not Correct");
-                let token = jsonwebtoken.sign({username: req.body.username}, 'yyx is always being correct', 
-                                              {algorithm: 'HS256', expiresIn: 129600});
+                let token = jsonwebtoken.sign({username: req.body.username}, process.env.AXIOM_IV, {algorithm: 'HS256', expiresIn: 129600});
                 res.json({success: true, err: null, token});
             });
+        } else {
+            res.status(400).json(err);
         }
     });
 });
 
 router.route('/signup').post((req, res) => {
 
-    const uid = new String(req.body.username);
-    const pswd = new String(req.body.password);
-    const newUser = new User({username: uid, password: pswd});
-
-    newUser.save(function(err, doc) {
-        if (err) res.status(400).json("Error");
-        res.status(500).json(doc);
+    new User(req.body).save(function(err, doc) {
+        if (err) res.status(400).json(err);
+        else res.status(500).json(doc);
     });
     
 });

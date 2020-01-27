@@ -1,29 +1,53 @@
 const router = require('express').Router();
-const jwt = require('jsonwebtoken')
-let Campus = require('../models/campus');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+let User = require('../model/user');
+let Campus = require('../model/campus');
 
 router.route('/').get((req, res) => {
-  Exercise.find()
-    .then(exercises => res.json(exercises))
-    .catch(err => res.status(400).json('Error: ' + err));
+    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+        if (!err) {
+            let query = {};
+            if (!doc.isServer) query = {username: doc.username};
+            Campus.find(query, (err, campuses) => {
+                if (err) res.status(400).json(err);
+                else res.json(campuses);
+            });
+        } else {
+            res.status(400).json(err);
+        }
+    });
 });
 
 router.route('/issue').post((req, res) => {
-    const username = req.body.username;
-    const description = req.body.description;
-    const duration = Number(req.body.duration);
-    const date = Date.parse(req.body.date);
+    let newCampus = new Campus(req.body);
+    newCampus.username = jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username;
+    newCampus.status = 'issued';
+    if (!newCampus.dateExpect)
+        newCampus.dateExpect = new Date();
+    newCampus.save((err, doc) => {
+        if (err) res.status(400).json(err);
+        else res.json(doc);
+    });
+});
 
-  const newExercise = new Exercise({
-    username,
-    description,
-    duration,
-    date,
-  });
-
-  newExercise.save()
-  .then(() => res.json('Exercise added!'))
-  .catch(err => res.status(400).json('Error: ' + err));
+router.route('/issue').put((req, res) => {
+    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+        console.log(doc.isServer)
+        if (!err && doc.isServer) {
+            Campus.findOneAndUpdate({_id: new mongoose.Types.ObjectId(req.body.id)}, {$set: req.body.newData}, {useFindAndModify: false})
+                  .then((doc) => {
+                      Campus.findOne({_id: doc._id}).then((doc) => {res.json(doc)})
+                               .catch((err) => {res.status(400).json(err)});
+                  })
+                  .catch((err) => {res.status(400).json(err)});
+        } else {
+            res.status(400).json(err);
+        }
+    });
+    console.log(req.body.id)
 });
 
 module.exports = router;
