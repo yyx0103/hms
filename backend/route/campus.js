@@ -50,6 +50,7 @@ router.route('/issue').put((req, res) => {
     User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
         if (!err) {
             if (!doc.isServer) delete req.body.newData.status;
+            else req.body.newData = {status: req.body.newData.status};
             let query = {};
             if (!doc.isServer) query = {_id: new mongoose.Types.ObjectId(req.body.id), username: doc.username};
             else query = {_id: new mongoose.Types.ObjectId(req.body.id)};

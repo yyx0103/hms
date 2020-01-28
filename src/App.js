@@ -1,15 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Redirect, withRouter } from "react-router-dom";
-import Navbar from './components/navbar';
-import CampusList from './components/campus';
 import CreateAccount from './components/signup';
-import LinkButton from './components/linkbutton';
-import Issue from './components/issue';
 import Button from 'react-bootstrap/Button'
-import "bootstrap/dist/css/bootstrap.min.css";
-
+import Login from './components/login';
 import axios from 'axios';
-
+import EnhancedIssue from './components/enhancedissue';
 
 export const Auth = {
   isAuthenticated: false,
@@ -20,7 +15,6 @@ export const Auth = {
       if (res.data.success) {
         this.token = res.data.token;
         this.isAuthenticated = true;
-        for (var a = 0; a < 1000; a++) console.log(res.data.isServer);
         this.isServer = res.data.role;
       } else {
         this.isAuthenticated = false;
@@ -39,73 +33,6 @@ export const Auth = {
     this.isAuthenticated = false;
     this.token = '';
     next(this.isAuthenticated);
-  }
-}
-
-class Login extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.onChangeUsername = this.onChangeUsername.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
-    this.login = this.login.bind(this);
-  }
-  state = {
-    username: '', 
-    password: '',
-    redirectToReferrer: false
-  }
-  onChangeUsername(e) {
-    this.setState({
-      username: e.target.value
-    });
-  }
-  onChangePassword(e) {
-    this.setState({
-      password: e.target.value
-    });
-  }
-  async login() {
-    Auth.authenticate({username: this.state.username, password: this.state.password}, (res) => {
-      this.setState(() => ({
-        redirectToReferrer: res
-      }));
-    });
-  }
-  render() {
-    
-    const { from } = this.props.location.state || { from: { pathname: '/issue' } };
-    const redirectToReferrer  = this.state.redirectToReferrer;
-    
-    if (redirectToReferrer === true) {
-      return (<Redirect to={from} />)
-    }
-
-    return (
-      <div>
-        <h3>Login</h3>
-          <div className="form-group"> 
-            <label>Username </label>
-            <input  type="text"
-                required
-                className="form-control"
-                value={this.state.username}
-                onChange={this.onChangeUsername}
-                />
-          </div>
-          <div className="form-group">
-            <label>password </label>
-            <input 
-                type="text" 
-                className="form-control"
-                value={this.state.password}
-                onChange={this.onChangePassword}
-                />
-          </div>
-            <Button onClick={this.login}> Login </Button>
-            <LinkButton to='/signup'> Signup </LinkButton>
-      </div>
-    )
   }
 }
 
@@ -136,17 +63,11 @@ export const AuthButton = withRouter(({ history }) => (
 
 function App() {
  return (
-   <Router>
-     <div className="container">
-     <Navbar />
-      <br/>
+   <Router>     
       <Route path="/login" component={Login} />
       <Route path="/signup" component={CreateAccount} />
-      <PrivateRoute path="/campus" component={CampusList} />
-      <PrivateRoute path="/issue" exact component={Issue} />
-      <PrivateRoute path="/issue/:id" component={Issue} />
+      <PrivateRoute path="/issue" exact component={EnhancedIssue} />
       <Route path="/" exact component={Login} />
-     </div>
    </Router>
  );
 }

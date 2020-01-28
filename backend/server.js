@@ -3,7 +3,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const expressJWT = require('express-jwt');
 const userRouter = require('./route/user');
-const deliveryRouter = require('./route/delivery');
 const campusRouter = require('./route/campus');
 
 require('dotenv').config();
@@ -26,7 +25,6 @@ connection.once('open', () => {
     console.log("MongoDB database connection established successfully");
 });
 
-app.use('/delivery', jwt, deliveryRouter);
 app.use('/campus', jwt, campusRouter);
 app.use('/user', jwt, userRouter);
 

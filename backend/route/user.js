@@ -20,7 +20,7 @@ router.route('/login').get((req, res) => {
         return
     }
     User.findOne({username: req.headers.username}, (err, user) => {
-        if (!err) {
+        if (!err && user) {
             user.comparePassword(req.headers.password, (err, isMatch) => {
                 if (err) return res.status(400).json(err);
                 if (!isMatch) return res.status(401).json("Password Not Correct");
