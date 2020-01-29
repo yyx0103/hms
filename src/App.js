@@ -10,6 +10,8 @@ import Button from "react-bootstrap/Button";
 import Login from "./components/login";
 import axios from "axios";
 import EnhancedIssue from "./components/enhancedissue";
+import { createMuiTheme } from '@material-ui/core/styles';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 
 export const Auth = {
     isAuthenticated: false,
@@ -74,22 +76,30 @@ export const AuthButton = withRouter(({ history }) =>
             </Button>
         </p>
     ) : (
-        <Button
-            onClick={() => {
-                history.push("/login");
-            }}
-        >
-            Login
+            <Button
+                onClick={() => {
+                    history.push("/login");
+                }}
+            >
+                Login
         </Button>
         )
 );
+
+const theme = createMuiTheme({
+    palette: {
+        type: 'dark',
+    }
+});
 
 function App() {
     return (
         <Router>
             <Route path="/login" component={Login} />
             <Route path="/signup" component={CreateAccount} />
-            <PrivateRoute path="/issue" exact component={EnhancedIssue} />
+            <MuiThemeProvider theme={theme}>
+                <PrivateRoute path="/issue" exact component={EnhancedIssue} />
+            </MuiThemeProvider>
             <Route path="/" exact component={Login} />
         </Router>
     );
