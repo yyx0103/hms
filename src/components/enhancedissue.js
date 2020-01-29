@@ -76,7 +76,6 @@ const styles = theme => ({
     }
 });
 
-
 class EnhancedIssue extends React.Component {
     tableRef = React.createRef();
     constructor(props) {
@@ -158,16 +157,7 @@ class EnhancedIssue extends React.Component {
                     }
                 }
             ],
-            data: [
-                {
-                    id: "632783162",
-                    title: "说的都是对的",
-                    description: "🐑说的都是对的",
-                    course: "ecse 321",
-                    status: "issued",
-                    dateDue: new Date("1999-05-26")
-                }
-            ]
+            data: []
         };
 
     }
