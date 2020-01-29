@@ -56,6 +56,7 @@ export class CreateAccount extends Component {
         this.onChangeUsername = this.onChangeUsername.bind(this);
         this.onChangePassword = this.onChangePassword.bind(this);
         this.onChangeIsServer = this.onChangeIsServer.bind(this);
+        this.onChangeFamily = this.onChangeFamily.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
@@ -69,6 +70,7 @@ export class CreateAccount extends Component {
         this.setState({
             username: "yuxiangma",
             password: "123456",
+            family: "yyxetmyx",
             isServer: false
         });
     }
@@ -76,6 +78,12 @@ export class CreateAccount extends Component {
     onChangeUsername(e) {
         this.setState({
             username: e.target.value
+        });
+    }
+
+    onChangeFamily(e) {
+        this.setState({
+            family: e.target.value
         });
     }
 
@@ -93,12 +101,14 @@ export class CreateAccount extends Component {
 
     async onSubmit(e) {
         e.preventDefault();
+        console.log(this.state)
         await axios({
             method: "post",
             url: "http://localhost:5000/user/signup",
             data: {
                 username: this.state.username,
                 password: this.state.password,
+                family: this.state.family,
                 isServer: this.state.isServer
             },
             headers: { "Content-Type": "application/json" }
@@ -123,7 +133,7 @@ export class CreateAccount extends Component {
                     </Typography>
                     <form className={classes.form} onSubmit={this.onSubmit} noValidate>
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     variant="outlined"
                                     required
@@ -134,6 +144,19 @@ export class CreateAccount extends Component {
                                     autoComplete="username"
                                     value={this.state.username}
                                     onChange={this.onChangeUsername}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="family"
+                                    label="Family"
+                                    name="family"
+                                    autoComplete="family"
+                                    value={this.state.family}
+                                    onChange={this.onChangeFamily}
                                 />
                             </Grid>
                             <Grid item xs={12}>
