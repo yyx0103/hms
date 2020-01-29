@@ -9,14 +9,14 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const jwt = expressJWT({secret: process.env.AXIOM_IV}).unless({path: ['/user/login', '/user/signup']})
+const jwt = expressJWT({ secret: process.env.AXIOM_IV }).unless({ path: ['/user/login', '/user/signup'] })
 
 app.use(cors());
 app.use(express.json());
 
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {
-    useNewUrlParser: true, 
+    useNewUrlParser: true,
     useCreateIndex: true
 });
 

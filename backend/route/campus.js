@@ -1,16 +1,16 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-require('dotenv').config();
-
 let User = require('../model/user');
 let Campus = require('../model/campus');
+require('dotenv').config();
+
 
 router.route('/').get((req, res) => {
-    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+    User.findOne({ username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username }, (err, doc) => {
         if (!err) {
             let query = {};
-            if (!doc.isServer) query = {username: doc.username};
+            if (!doc.isServer) query = { username: doc.username };
             Campus.find(query, (err, campuses) => {
                 if (err) res.status(400).json(err);
                 else res.json(campuses);
@@ -33,13 +33,13 @@ router.route('/issue').post((req, res) => {
 });
 
 router.route('/issue').delete((req, res) => {
-    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+    User.findOne({ username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username }, (err, doc) => {
         if (!err && !doc.isServer) {
-            Campus.findOneAndRemove({_id: new mongoose.Types.ObjectId(req.body.id), username: doc.username})
-                  .then((doc) => {
-                      res.json(doc);
-                  })
-                  .catch((err) => {res.status(400).json(err)});
+            Campus.findOneAndRemove({ _id: new mongoose.Types.ObjectId(req.body.id), username: doc.username })
+                .then((doc) => {
+                    res.json(doc);
+                })
+                .catch((err) => { res.status(400).json(err) });
         } else {
             res.status(400).json(err);
         }
@@ -47,19 +47,19 @@ router.route('/issue').delete((req, res) => {
 });
 
 router.route('/issue').put((req, res) => {
-    User.findOne({username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username}, (err, doc) => {
+    User.findOne({ username: jwt.verify(req.headers.authorization.split(' ')[1], process.env.AXIOM_IV).username }, (err, doc) => {
         if (!err) {
             if (!doc.isServer) delete req.body.newData.status;
-            else req.body.newData = {status: req.body.newData.status};
+            else req.body.newData = { status: req.body.newData.status };
             let query = {};
-            if (!doc.isServer) query = {_id: new mongoose.Types.ObjectId(req.body.id), username: doc.username};
-            else query = {_id: new mongoose.Types.ObjectId(req.body.id)};
-            Campus.findOneAndUpdate(query, {$set: req.body.newData}, {useFindAndModify: false})
-                  .then((doc) => {
-                      Campus.findOne({_id: doc._id}).then((doc) => {res.json(doc)})
-                               .catch((err) => {res.status(400).json(err)});
-                  })
-                  .catch((err) => {res.status(400).json(err)});
+            if (!doc.isServer) query = { _id: new mongoose.Types.ObjectId(req.body.id), username: doc.username };
+            else query = { _id: new mongoose.Types.ObjectId(req.body.id) };
+            Campus.findOneAndUpdate(query, { $set: req.body.newData }, { useFindAndModify: false })
+                .then((doc) => {
+                    Campus.findOne({ _id: doc._id }).then((doc) => { res.json(doc) })
+                        .catch((err) => { res.status(400).json(err) });
+                })
+                .catch((err) => { res.status(400).json(err) });
         } else {
             res.status(400).json(err);
         }

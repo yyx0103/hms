@@ -4,27 +4,27 @@ const Schema = mongoose.Schema;
 
 const campusSchema = new Schema({
     username: {
-        type: String, 
+        type: String,
         required: true
     },
     title: {
-        type: String, 
+        type: String,
         required: true
     },
     course: {
-        type: String, 
+        type: String,
         required: true
     },
     description: {
-        type: String, 
+        type: String,
         required: true
     },
     dateDue: {
-        type: Date, 
-        required: false 
+        type: Date,
+        required: false
     },
     status: {
-        type: String, 
+        type: String,
         required: true
     }
 }, {
