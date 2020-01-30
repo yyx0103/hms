@@ -47,12 +47,13 @@ router.route("/issue").delete((req, res) => {
         ).username
     }).then((doc) => {
         Campus.findOneAndRemove({
-            _id: new mongoose.Types.ObjectId(req.body._id),
+            _id: new mongoose.Types.ObjectId(req.body.id),
             username: doc.username,
             family: doc.family
         }).catch(err => {
             res.status(400).json(err);
         });
+        res.status(200).json({});
     }).catch(err => {
         res.status(400).json(err);
     });

@@ -186,7 +186,7 @@ class EnhancedIssue extends React.Component {
                     <div className={classes.form}>
                         <MaterialTable
                             icons={tableIcons}
-                            title={this.state.family}
+                            title={this.state.family + " 的 " + Auth.username}
                             tableRef={this.tableRef}
                             columns={this.state.columns}
                             data={async query =>
@@ -241,7 +241,6 @@ class EnhancedIssue extends React.Component {
                                 })
                             }
                             editable={{
-                                // isEditable: rowData => rowData.username === Auth.username,
                                 onRowAdd: newData =>
                                     new Promise(async (resolve, reject) => {
                                         await axios({
@@ -274,14 +273,30 @@ class EnhancedIssue extends React.Component {
                                         this.tableRef.current &&
                                             this.tableRef.current.onQueryChange();
                                         resolve();
+                                    }),
+                                onRowDelete: oldData =>
+                                    new Promise(async (resolve, reject) => {
+                                        await axios
+                                            .delete("http://localhost:5000/campus/issue", {
+                                                headers: {
+                                                    Authorization: "Bearer " + Auth.token
+                                                },
+                                                data: {
+                                                    id: oldData._id
+                                                }
+                                            })
+                                            .then(response => { });
+                                        this.tableRef.current &&
+                                            this.tableRef.current.onQueryChange();
+                                        resolve();
                                     })
                             }}
                             options={{
                                 search: true,
                                 selection: true,
                                 selectionProps: rowData => ({
-                                    disabled: rowData.isFinished || rowData.executor,
-                                    color: 'primary'
+                                    disabled: rowData.isFinished || (!rowData.executor && rowData.executor.length > 0 && rowData.executor !== Auth.username),
+                                    color: 'secondary'
                                 })
                             }}
                             actions={[
@@ -306,9 +321,9 @@ class EnhancedIssue extends React.Component {
                                                     }
                                                 })
                                                 .then(response => { });
-
+                                            this.tableRef.current && this.tableRef.current.onQueryChange();
                                         });
-                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+
                                     }
                                 },
                                 {
@@ -316,7 +331,6 @@ class EnhancedIssue extends React.Component {
                                     icon: ShoppingCartIcon,
                                     onClick: async (evt, datax) => {
                                         await datax.map(async data => {
-                                            console.log()
                                             await axios({
                                                 method: "put",
                                                 url: "http://localhost:5000/campus/issue",
@@ -330,8 +344,9 @@ class EnhancedIssue extends React.Component {
                                                     Authorization: "Bearer " + Auth.token
                                                 }
                                             }).then(() => {
-                                                this.tableRef.current && this.tableRef.current.onQueryChange();
+
                                             });
+                                            this.tableRef.current && this.tableRef.current.onQueryChange();
                                         });
 
                                     }
@@ -341,7 +356,6 @@ class EnhancedIssue extends React.Component {
                                     icon: AssignmentTurnedInIcon,
                                     onClick: (evt, datax) => {
                                         datax.map(async data => {
-                                            console.log()
                                             await axios({
                                                 method: "put",
                                                 url: "http://localhost:5000/campus/issue",
@@ -355,8 +369,9 @@ class EnhancedIssue extends React.Component {
                                                     Authorization: "Bearer " + Auth.token
                                                 }
                                             });
+                                            this.tableRef.current && this.tableRef.current.onQueryChange();
                                         });
-                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+
                                     }
                                 }
                             ]}
