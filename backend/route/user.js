@@ -44,7 +44,6 @@ router.route("/signup").post((req, res) => {
     if (req.body.family && req.body.username) {
         req.body.username = req.body.username + '@' + req.body.family;
         Family.findOne({ family: req.body.family }).then(async (doc) => {
-            console.log(doc)
             if (!doc) {
                 await new Family({ family: req.body.family, member: [req.body.username] }).save();
             } else {

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const campusSchema = new Schema({
+const taskSchema = new Schema({
     username: {
         type: String,
         required: true
@@ -35,6 +35,6 @@ const campusSchema = new Schema({
     timestamps: true,
 });
 
-const Campus = mongoose.model('Campus', campusSchema);
+const Task = mongoose.model('Task', taskSchema);
 
-module.exports = Campus;
+module.exports = Task;

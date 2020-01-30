@@ -12,8 +12,6 @@ import { Auth } from "../App";
 import "typeface-roboto";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Check from "@material-ui/icons/Check";
@@ -34,6 +32,22 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Grid from '@material-ui/core/Grid';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
+
+
+function Copyright() {
+    return (
+        <Typography variant="body2" color="textSecondary" align="center">
+            {'Copyright © '}
+            <Link color="inherit" href="https://github.com/yyx0103">
+                Yuxin Yang
+        </Link>{' '}
+            {new Date().getFullYear()}
+            {'.'}
+        </Typography>
+    );
+}
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -104,10 +118,11 @@ class EnhancedIssue extends React.Component {
                     field: "description",
                 },
                 {
-                    title: "Assignment",
+                    title: "Exec",
                     field: "executor",
                     editable: "never"
                 },
+
                 {
                     title: "Date Due",
                     field: "dateDue",
@@ -159,7 +174,12 @@ class EnhancedIssue extends React.Component {
                             </MuiPickersUtilsProvider>
                         );
                     }
-                }
+                }, {
+                    title: "Status",
+                    field: "isFinished",
+                    editable: "never"
+                },
+
             ],
             data: []
         };
@@ -186,18 +206,22 @@ class EnhancedIssue extends React.Component {
                     <div className={classes.form}>
                         <MaterialTable
                             icons={tableIcons}
-                            title={this.state.family + " çš„ " + Auth.username}
+                            title={Auth.username}
                             tableRef={this.tableRef}
                             columns={this.state.columns}
                             data={async query =>
                                 new Promise(async (resolve, reject) => {
                                     await axios
-                                        .get("http://localhost:5000/campus/", {
+                                        .get("http://localhost:5000/task/", {
                                             headers: { Authorization: "Bearer " + Auth.token }
                                         })
                                         .then(response => {
                                             response.data.map(e => {
                                                 e.date = new Date(e.dateDue.toString());
+                                                e.isFinished = (e.isFinished) ? "Finished" : "Issued";
+                                                if (e.executor) {
+                                                    e.executor = e.executor.substr(0, e.executor.indexOf("@"));
+                                                }
                                             });
                                             let retdata = [];
                                             if (!query.search || query.search.length < 1) {
@@ -235,9 +259,7 @@ class EnhancedIssue extends React.Component {
                                                 totalCount: response.data.length
                                             });
                                         })
-                                        .catch(function (error) {
-                                            console.log(error);
-                                        });
+                                        .catch(function (error) { });
                                 })
                             }
                             editable={{
@@ -245,7 +267,7 @@ class EnhancedIssue extends React.Component {
                                     new Promise(async (resolve, reject) => {
                                         await axios({
                                             method: "post",
-                                            url: "http://localhost:5000/campus/issue",
+                                            url: "http://localhost:5000/task/issue",
                                             data: newData,
                                             headers: {
                                                 "Content-Type": "application/json",
@@ -258,10 +280,9 @@ class EnhancedIssue extends React.Component {
                                     }),
                                 onRowUpdate: (newData, oldData) =>
                                     new Promise(async (resolve, reject) => {
-                                        console.log(newData);
                                         await axios({
                                             method: "put",
-                                            url: "http://localhost:5000/campus/issue",
+                                            url: "http://localhost:5000/task/issue",
                                             data: { id: oldData._id, newData: newData },
                                             headers: {
                                                 "Content-Type": "application/json",
@@ -277,7 +298,7 @@ class EnhancedIssue extends React.Component {
                                 onRowDelete: oldData =>
                                     new Promise(async (resolve, reject) => {
                                         await axios
-                                            .delete("http://localhost:5000/campus/issue", {
+                                            .delete("http://localhost:5000/task/issue", {
                                                 headers: {
                                                     Authorization: "Bearer " + Auth.token
                                                 },
@@ -292,12 +313,19 @@ class EnhancedIssue extends React.Component {
                                     })
                             }}
                             options={{
+                                exportButton: true,
                                 search: true,
                                 selection: true,
                                 selectionProps: rowData => ({
-                                    disabled: rowData.isFinished || (!rowData.executor && rowData.executor.length > 0 && rowData.executor !== Auth.username),
+                                    disabled: rowData.isFinished === "Finished" || (!rowData.executor && rowData.executor != "" && Auth.username.includes(rowData.executor)),
                                     color: 'secondary'
-                                })
+                                }),
+                                headerStyle: {
+                                    textAlign: 'center',
+                                },
+                                rowStyle: {
+                                    textAlign: 'center',
+                                }
                             }}
                             actions={[
                                 {
@@ -312,7 +340,7 @@ class EnhancedIssue extends React.Component {
                                     onClick: (evt, datax) => {
                                         datax.map(async data => {
                                             await axios
-                                                .delete("http://localhost:5000/campus/issue", {
+                                                .delete("http://localhost:5000/task/issue", {
                                                     headers: {
                                                         Authorization: "Bearer " + Auth.token
                                                     },
@@ -333,7 +361,7 @@ class EnhancedIssue extends React.Component {
                                         await datax.map(async data => {
                                             await axios({
                                                 method: "put",
-                                                url: "http://localhost:5000/campus/issue",
+                                                url: "http://localhost:5000/task/issue",
                                                 data: {
                                                     id: data._id, newData: {
                                                         executor: Auth.username
@@ -358,7 +386,7 @@ class EnhancedIssue extends React.Component {
                                         datax.map(async data => {
                                             await axios({
                                                 method: "put",
-                                                url: "http://localhost:5000/campus/issue",
+                                                url: "http://localhost:5000/task/issue",
                                                 data: {
                                                     id: data._id, newData: {
                                                         isFinished: true
@@ -371,7 +399,6 @@ class EnhancedIssue extends React.Component {
                                             });
                                             this.tableRef.current && this.tableRef.current.onQueryChange();
                                         });
-
                                     }
                                 }
                             ]}

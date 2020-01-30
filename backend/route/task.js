@@ -2,7 +2,7 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 let User = require("../model/user");
-let Campus = require("../model/campus");
+let Task = require("../model/task");
 require("dotenv").config();
 
 router.route("/").get((req, res) => {
@@ -15,7 +15,7 @@ router.route("/").get((req, res) => {
         },
         (err, doc) => {
             if (!err) {
-                Campus.find({ family: doc.family }).then(cs => res.json(cs)).catch(err => res.status(400).json(err));
+                Task.find({ family: doc.family }).then(cs => res.json(cs)).catch(err => res.status(400).json(err));
             } else {
                 res.status(400).json(err);
             }
@@ -24,15 +24,15 @@ router.route("/").get((req, res) => {
 });
 
 router.route("/issue").post((req, res) => {
-    let newCampus = new Campus(req.body);
-    newCampus.username = jwt.verify(
+    let newTask = new Task(req.body);
+    newTask.username = jwt.verify(
         req.headers.authorization.split(" ")[1],
         process.env.AXIOM_IV
     ).username;
-    User.findOne({ username: newCampus.username }).then((usr) => {
-        newCampus.family = usr.family;
-        if (!newCampus.dateDue) newCampus.dateDue = new Date();
-        newCampus.save((err, doc) => {
+    User.findOne({ username: newTask.username }).then((usr) => {
+        newTask.family = usr.family;
+        if (!newTask.dateDue) newTask.dateDue = new Date();
+        newTask.save((err, doc) => {
             if (err) res.status(400).json(err);
             else res.json(doc);
         });
@@ -46,7 +46,7 @@ router.route("/issue").delete((req, res) => {
             process.env.AXIOM_IV
         ).username
     }).then((doc) => {
-        Campus.findOneAndRemove({
+        Task.findOneAndRemove({
             _id: new mongoose.Types.ObjectId(req.body.id),
             username: doc.username,
             family: doc.family
@@ -72,7 +72,7 @@ router.route("/issue").put((req, res) => {
                 res.status(400).json(err);
                 return;
             }
-            Campus.findOne({ _id: req.body.id, family: doc.family }).then((task) => {
+            Task.findOne({ _id: req.body.id, family: doc.family }).then((task) => {
 
                 delete req.body.newData.username;
                 delete req.body.newData.family;
