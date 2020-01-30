@@ -317,7 +317,7 @@ class EnhancedIssue extends React.Component {
                                 search: true,
                                 selection: true,
                                 selectionProps: rowData => ({
-                                    disabled: rowData.isFinished === "Finished" || (!rowData.executor && rowData.executor != "" && Auth.username.includes(rowData.executor)),
+                                    disabled: rowData.isFinished === "Finished",
                                     color: 'secondary'
                                 }),
                                 headerStyle: {
