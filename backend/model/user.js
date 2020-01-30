@@ -19,10 +19,6 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true
-    },
-    isServer: {
-        type: Boolean,
-        required: true
     }
 });
 

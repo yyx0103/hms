@@ -55,23 +55,21 @@ export class CreateAccount extends Component {
 
         this.onChangeUsername = this.onChangeUsername.bind(this);
         this.onChangePassword = this.onChangePassword.bind(this);
-        this.onChangeIsServer = this.onChangeIsServer.bind(this);
         this.onChangeFamily = this.onChangeFamily.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
 
         this.state = {
             username: "",
             password: "",
-            isServer: false
+            family: ""
         };
     }
 
     componentDidMount() {
         this.setState({
-            username: "yuxiangma",
-            password: "123456",
-            family: "yyxetmyx",
-            isServer: false
+            username: "",
+            password: "",
+            family: ""
         });
     }
 
@@ -93,12 +91,6 @@ export class CreateAccount extends Component {
         });
     }
 
-    onChangeIsServer(e) {
-        this.setState({
-            isServer: e.target.checked // (e.target.value === 'true')
-        });
-    }
-
     async onSubmit(e) {
         e.preventDefault();
         console.log(this.state)
@@ -109,7 +101,6 @@ export class CreateAccount extends Component {
                 username: this.state.username,
                 password: this.state.password,
                 family: this.state.family,
-                isServer: this.state.isServer
             },
             headers: { "Content-Type": "application/json" }
         })
@@ -171,18 +162,6 @@ export class CreateAccount extends Component {
                                     autoComplete="current-password"
                                     value={this.state.password}
                                     onChange={this.onChangePassword}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            color="primary"
-                                            value={this.state.isServer}
-                                            onChange={this.onChangeIsServer}
-                                        />
-                                    }
-                                    label="I want to be a server."
                                 />
                             </Grid>
                         </Grid>

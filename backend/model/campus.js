@@ -11,10 +11,6 @@ const campusSchema = new Schema({
         type: String,
         required: true
     },
-    course: {
-        type: String,
-        required: true
-    },
     description: {
         type: String,
         required: true
@@ -23,9 +19,17 @@ const campusSchema = new Schema({
         type: Date,
         required: false
     },
-    status: {
+    family: {
         type: String,
         required: true
+    },
+    executor: {
+        type: String,
+        required: false
+    },
+    isFinished: {
+        type: Boolean,
+        required: false
     }
 }, {
     timestamps: true,

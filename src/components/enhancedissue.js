@@ -30,6 +30,10 @@ import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import DeleteIcon from '@material-ui/icons/Delete';
+import Grid from '@material-ui/core/Grid';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -71,7 +75,6 @@ const styles = theme => ({
         backgroundColor: theme.palette.secondary.main
     },
     form: {
-        width: "100%",
         marginTop: theme.spacing(3)
     },
     submit: {
@@ -88,42 +91,22 @@ class EnhancedIssue extends React.Component {
             family: "Yang Yuxin",
             columns: [
                 {
+                    title: "Posted By",
+                    field: "username",
+                    editable: "never"
+                },
+                {
                     title: "Title",
                     field: "title",
-                    editable: Auth.isServer ? "never" : "onAdd"
                 },
                 {
                     title: "Description",
                     field: "description",
-                    editable: Auth.isServer ? "never" : "onAdd"
                 },
                 {
-                    title: "Course",
-                    field: "course",
-                    editable: Auth.isServer ? "never" : "onAdd"
-                },
-                {
-                    title: "Status",
-                    field: "status",
-                    editComponent: props => {
-                        if (Auth.isServer) {
-                            return (
-                                <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={props.value}
-                                    onChange={s => props.onChange(s.target.value)}
-                                >
-                                    <MenuItem value={"issued"}>issued</MenuItem>
-                                    <MenuItem value={"accpted"}>accpted</MenuItem>
-                                    <MenuItem value={"finished"}>finished</MenuItem>
-                                    <MenuItem value={"canceled"}>canceled</MenuItem>
-                                </Select>
-                            );
-                        } else {
-                            return <p>{props.value}</p>;
-                        }
-                    }
+                    title: "Assignment",
+                    field: "executor",
+                    editable: "never"
                 },
                 {
                     title: "Date Due",
@@ -131,42 +114,48 @@ class EnhancedIssue extends React.Component {
                     render: props => {
                         return (
                             <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                <KeyboardDatePicker
-                                    disableToolbar
-                                    variant="inline"
-                                    format="MM/dd/yyyy"
-                                    margin="normal"
-                                    id="date-picker-inline"
-                                    value={props.dateDue}
-                                    disabled={true}
-                                    onChange={date => props.onChange(date)}
-                                    KeyboardButtonProps={{
-                                        "aria-label": "change date",
-                                        disabled: true,
-                                        onChange: date => props.onChange(date)
-                                    }}
-                                />
+                                <Grid container justify="space-around">
+                                    <KeyboardDatePicker
+                                        disableToolbar
+                                        variant="dialog"
+                                        format="MM/dd/yyyy"
+                                        margin="none"
+                                        fullWidth={false}
+                                        id="date-picker-inline"
+                                        value={props.dateDue}
+                                        disabled={true}
+                                        onChange={date => props.onChange(date)}
+                                        KeyboardButtonProps={{
+                                            "aria-label": "change date",
+                                            disabled: true,
+                                            onChange: date => props.onChange(date)
+                                        }}
+                                    />
+                                </Grid>
                             </MuiPickersUtilsProvider>
                         );
                     },
                     editComponent: props => {
                         return (
                             <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                <KeyboardDatePicker
-                                    disableToolbar
-                                    variant="inline"
-                                    format="MM/dd/yyyy"
-                                    margin="normal"
-                                    disabled={Auth.isServer}
-                                    id="date-picker-inline"
-                                    value={props.dateDue}
-                                    onChange={date => props.onChange(date)}
-                                    KeyboardButtonProps={{
-                                        "aria-label": "change date",
-                                        disabled: Auth.isServer,
-                                        onChange: date => props.onChange(date)
-                                    }}
-                                />
+                                <Grid container justify="space-around">
+                                    <KeyboardDatePicker
+                                        disableToolbar
+                                        variant="dialog"
+                                        format="MM/dd/yyyy"
+                                        margin="none"
+                                        fullWidth={false}
+                                        disabled={props.isFinished || props.executor}
+                                        id="date-picker-inline"
+                                        value={props.dateDue}
+                                        onChange={date => props.onChange(date)}
+                                        KeyboardButtonProps={{
+                                            "aria-label": "change date",
+                                            disabled: props.isFinished || props.executor,
+                                            onChange: date => props.onChange(date)
+                                        }}
+                                    />
+                                </Grid>
                             </MuiPickersUtilsProvider>
                         );
                     }
@@ -183,9 +172,9 @@ class EnhancedIssue extends React.Component {
             })
             .then(user => {
                 this.setState({ family: (user.data.family) ? (user.data.family) : this.state.family });
+                this.setState({ member: user.data.member });
             })
             .catch(err => { });
-        console.log(this.state.family)
     }
 
     render() {
@@ -252,26 +241,25 @@ class EnhancedIssue extends React.Component {
                                 })
                             }
                             editable={{
-                                onRowAdd: Auth.isServer
-                                    ? null
-                                    : newData =>
-                                        new Promise(async (resolve, reject) => {
-                                            newData.status = "issued";
-                                            await axios({
-                                                method: "post",
-                                                url: "http://localhost:5000/campus/issue",
-                                                data: newData,
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                    Authorization: "Bearer " + Auth.token
-                                                }
-                                            }).catch(err => { });
-                                            this.tableRef.current &&
-                                                this.tableRef.current.onQueryChange();
-                                            resolve();
-                                        }),
+                                // isEditable: rowData => rowData.username === Auth.username,
+                                onRowAdd: newData =>
+                                    new Promise(async (resolve, reject) => {
+                                        await axios({
+                                            method: "post",
+                                            url: "http://localhost:5000/campus/issue",
+                                            data: newData,
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: "Bearer " + Auth.token
+                                            }
+                                        }).catch(err => { });
+                                        this.tableRef.current &&
+                                            this.tableRef.current.onQueryChange();
+                                        resolve();
+                                    }),
                                 onRowUpdate: (newData, oldData) =>
                                     new Promise(async (resolve, reject) => {
+                                        console.log(newData);
                                         await axios({
                                             method: "put",
                                             url: "http://localhost:5000/campus/issue",
@@ -280,30 +268,21 @@ class EnhancedIssue extends React.Component {
                                                 "Content-Type": "application/json",
                                                 Authorization: "Bearer " + Auth.token
                                             }
+                                        }).catch(err => {
+
                                         });
-                                        this.tableRef.current &&
-                                            this.tableRef.current.onQueryChange();
-                                        resolve();
-                                    }),
-                                onRowDelete: oldData =>
-                                    new Promise(async (resolve, reject) => {
-                                        await axios
-                                            .delete("http://localhost:5000/campus/issue", {
-                                                headers: {
-                                                    Authorization: "Bearer " + Auth.token
-                                                },
-                                                data: {
-                                                    id: oldData._id
-                                                }
-                                            })
-                                            .then(response => { });
                                         this.tableRef.current &&
                                             this.tableRef.current.onQueryChange();
                                         resolve();
                                     })
                             }}
                             options={{
-                                search: true
+                                search: true,
+                                selection: true,
+                                selectionProps: rowData => ({
+                                    disabled: rowData.isFinished || rowData.executor,
+                                    color: 'primary'
+                                })
                             }}
                             actions={[
                                 {
@@ -311,6 +290,74 @@ class EnhancedIssue extends React.Component {
                                     tooltip: "Logout",
                                     isFreeAction: true,
                                     onClick: () => Auth.signout(() => window.location.reload())
+                                },
+                                {
+                                    tooltip: 'Remove All Selected Tasks',
+                                    icon: DeleteIcon,
+                                    onClick: (evt, datax) => {
+                                        datax.map(async data => {
+                                            await axios
+                                                .delete("http://localhost:5000/campus/issue", {
+                                                    headers: {
+                                                        Authorization: "Bearer " + Auth.token
+                                                    },
+                                                    data: {
+                                                        id: data._id
+                                                    }
+                                                })
+                                                .then(response => { });
+
+                                        });
+                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+                                    }
+                                },
+                                {
+                                    tooltip: 'Assign Yourself to These Tasks',
+                                    icon: ShoppingCartIcon,
+                                    onClick: async (evt, datax) => {
+                                        await datax.map(async data => {
+                                            console.log()
+                                            await axios({
+                                                method: "put",
+                                                url: "http://localhost:5000/campus/issue",
+                                                data: {
+                                                    id: data._id, newData: {
+                                                        executor: Auth.username
+                                                    }
+                                                },
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: "Bearer " + Auth.token
+                                                }
+                                            }).then(() => {
+                                                this.tableRef.current && this.tableRef.current.onQueryChange();
+                                            });
+                                        });
+
+                                    }
+                                },
+                                {
+                                    tooltip: 'Mark as Finished',
+                                    icon: AssignmentTurnedInIcon,
+                                    onClick: (evt, datax) => {
+                                        datax.map(async data => {
+                                            console.log()
+                                            await axios({
+                                                method: "put",
+                                                url: "http://localhost:5000/campus/issue",
+                                                data: {
+                                                    id: data._id, newData: {
+                                                        isFinished: true
+                                                    }
+                                                },
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: "Bearer " + Auth.token
+                                                }
+                                            });
+                                        });
+                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+                                    }
                                 }
                             ]}
                         />

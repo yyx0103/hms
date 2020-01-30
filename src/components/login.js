@@ -121,7 +121,7 @@ class Login extends React.Component {
                             id="username"
                             label="Username"
                             name="username"
-                            autoComplete="username"
+                            autoComplete="username@family"
                             value={this.state.username}
                             onChange={this.onChangeUsername}
                             autoFocus

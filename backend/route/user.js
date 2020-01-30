@@ -2,6 +2,7 @@ const router = require("express").Router();
 const jsonwebtoken = require("jsonwebtoken");
 
 let User = require("../model/user");
+let Family = require("../model/family");
 
 router.route("/").get((req, res) => {
     User.findOne({
@@ -11,8 +12,7 @@ router.route("/").get((req, res) => {
         ).username
     })
         .then(user => {
-            delete user.password;
-            res.json(user);
+            Family.findOne({ family: user.family }).then(f => res.json(f));
         })
         .catch(err => res.status(400).json(err));
 });
@@ -32,7 +32,7 @@ router.route("/login").get((req, res) => {
                     process.env.AXIOM_IV,
                     { algorithm: "HS256", expiresIn: 129600 }
                 );
-                res.json({ success: true, err: null, role: user.isServer, token });
+                res.json({ success: true, err: null, name: user.username, token });
             });
         } else {
             res.status(400).json(err);
@@ -40,11 +40,32 @@ router.route("/login").get((req, res) => {
     });
 });
 
-router.route("/signup").post(async (req, res) => {
-    await new User(req.body).save(function (err, doc) {
-        if (err) res.status(400).json(err);
-        else res.json(doc);
-    });
+router.route("/signup").post((req, res) => {
+    if (req.body.family && req.body.username) {
+        req.body.username = req.body.username + '@' + req.body.family;
+        Family.findOne({ family: req.body.family }).then(async (doc) => {
+            console.log(doc)
+            if (!doc) {
+                await new Family({ family: req.body.family, member: [req.body.username] }).save();
+            } else {
+                if (!doc.member.includes(req.body.username)) doc.member.push(req.body.username);
+                await doc.save().catch(err => {
+                    res.status(400).json(err);
+                    return;
+                });
+            }
+            await new User(req.body).save((err, doc) => {
+                if (err) res.status(400).json(err);
+                else res.json(doc);
+            });
+        }).catch(err => {
+            res.status(400).json(err);
+            return;
+        });
+    } else {
+        res.status(400).json("should be a family");
+        return;
+    }
 });
 
 module.exports = router;

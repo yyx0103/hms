@@ -16,15 +16,15 @@ import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 export const Auth = {
     isAuthenticated: false,
     token: "",
-    isServer: false,
+    username: "",
     async authenticate(userinfo, next) {
         await axios
             .get("http://localhost:5000/user/login", { headers: userinfo })
             .then(res => {
                 if (res.data.success) {
                     this.token = res.data.token;
+                    this.username = res.data.name;
                     this.isAuthenticated = true;
-                    this.isServer = res.data.role;
                 } else {
                     this.isAuthenticated = false;
                 }
