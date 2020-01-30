@@ -1,7 +1,7 @@
-# 🐑的任务版
-### 注意，目前版本不支持分手功能
-### 今后不会（也不敢）支持分手功能
-### 注册完family就不能再改变了
+# 🐑的任务板（洗白前是作业代写平台）
+# 🐑's Task Board
+### 注意，目前版本不支持分手功能，今后不会（也不敢）支持分手功能，这意味着注册完family就不能再改变了
+### You cannot change family, since we do not support (couples) break up
 
 ## Available Scripts
 
