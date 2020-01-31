@@ -68,7 +68,6 @@ const tableIcons = {
 const styles = theme => ({
     darkColor: {
         color: theme.palette.primary.dark,
-        marginBottom: theme.spacing(3)
     },
     paper: {
         marginTop: theme.spacing(8),
@@ -99,7 +98,7 @@ const styles = theme => ({
             width: "80%"
         },
         editor: {
-            borderBottom: "1px solid gray" 
+            borderBottom: "1px solid gray"
         }
     }
 });
@@ -222,138 +221,138 @@ class EnhancedIssue extends React.Component {
     render() {
         const { classes } = this.props;
         return (
-            <ThemeProvider theme={classes.darkColor}>
-                <Container>
-                    <CssBaseline />
-                    <div className={classes.form}>
-                        <MaterialTable
-                            icons={tableIcons}
-                            title={Auth.username}
-                            tableRef={this.tableRef}
-                            columns={this.state.columns}
-                            data={async query =>
+            // <ThemeProvider theme={classes.darkColor}>
+            <Container>
+                <CssBaseline />
+                <div className={classes.form}>
+                    <MaterialTable
+                        icons={tableIcons}
+                        title={Auth.username}
+                        tableRef={this.tableRef}
+                        columns={this.state.columns}
+                        data={async query =>
+                            new Promise(async (resolve, reject) => {
+                                await axios
+                                    .get("http://localhost:5000/task/", {
+                                        headers: { Authorization: "Bearer " + Auth.token }
+                                    })
+                                    .then(response => {
+                                        response.data.map(e => {
+                                            e.date = new Date(e.dateDue.toString());
+                                            e.isFinished = (e.isFinished) ? "Finished" : "Issued";
+                                            if (e.executor) {
+                                                e.executor = e.executor.substr(0, e.executor.indexOf("@"));
+                                            }
+                                            return e;
+                                        });
+                                        let retdata = [];
+                                        if (!query.search || query.search.length < 1) {
+                                            retdata = response.data.slice(
+                                                Math.min(
+                                                    query.page * query.pageSize,
+                                                    response.data.length
+                                                ),
+                                                Math.min(
+                                                    (query.page + 1) * query.pageSize,
+                                                    response.data.length
+                                                )
+                                            );
+                                        } else {
+                                            let nndatas = [];
+                                            for (const entry of response.data) {
+                                                if (entry.title.includes(query.search)) {
+                                                    nndatas.push(entry);
+                                                }
+                                            }
+                                            retdata = nndatas.slice(
+                                                Math.min(
+                                                    query.page * query.pageSize,
+                                                    response.data.length
+                                                ),
+                                                Math.min(
+                                                    (query.page + 1) * query.pageSize,
+                                                    response.data.length
+                                                )
+                                            );
+                                        }
+                                        resolve({
+                                            data: retdata,
+                                            page: query.page,
+                                            totalCount: response.data.length
+                                        });
+                                    })
+                                    .catch(function (error) { });
+                            })
+                        }
+                        editable={{
+                            onRowAdd: newData =>
+                                new Promise(async (resolve, reject) => {
+                                    await axios({
+                                        method: "post",
+                                        url: "http://localhost:5000/task/issue",
+                                        data: newData,
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: "Bearer " + Auth.token
+                                        }
+                                    }).catch(err => { });
+                                    this.tableRef.current &&
+                                        this.tableRef.current.onQueryChange();
+                                    resolve();
+                                }),
+                            onRowUpdate: (newData, oldData) =>
+                                new Promise(async (resolve, reject) => {
+                                    await axios({
+                                        method: "put",
+                                        url: "http://localhost:5000/task/issue",
+                                        data: { id: oldData._id, newData: newData },
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: "Bearer " + Auth.token
+                                        }
+                                    }).catch(err => {
+
+                                    });
+                                    this.tableRef.current &&
+                                        this.tableRef.current.onQueryChange();
+                                    resolve();
+                                }),
+                            onRowDelete: oldData =>
                                 new Promise(async (resolve, reject) => {
                                     await axios
-                                        .get("http://localhost:5000/task/", {
-                                            headers: { Authorization: "Bearer " + Auth.token }
-                                        })
-                                        .then(response => {
-                                            response.data.map(e => {
-                                                e.date = new Date(e.dateDue.toString());
-                                                e.isFinished = (e.isFinished) ? "Finished" : "Issued";
-                                                if (e.executor) {
-                                                    e.executor = e.executor.substr(0, e.executor.indexOf("@"));
-                                                }
-                                                return e;
-                                            });
-                                            let retdata = [];
-                                            if (!query.search || query.search.length < 1) {
-                                                retdata = response.data.slice(
-                                                    Math.min(
-                                                        query.page * query.pageSize,
-                                                        response.data.length
-                                                    ),
-                                                    Math.min(
-                                                        (query.page + 1) * query.pageSize,
-                                                        response.data.length
-                                                    )
-                                                );
-                                            } else {
-                                                let nndatas = [];
-                                                for (const entry of response.data) {
-                                                    if (entry.title.includes(query.search)) {
-                                                        nndatas.push(entry);
-                                                    }
-                                                }
-                                                retdata = nndatas.slice(
-                                                    Math.min(
-                                                        query.page * query.pageSize,
-                                                        response.data.length
-                                                    ),
-                                                    Math.min(
-                                                        (query.page + 1) * query.pageSize,
-                                                        response.data.length
-                                                    )
-                                                );
+                                        .delete("http://localhost:5000/task/issue", {
+                                            headers: {
+                                                Authorization: "Bearer " + Auth.token
+                                            },
+                                            data: {
+                                                id: oldData._id
                                             }
-                                            resolve({
-                                                data: retdata,
-                                                page: query.page,
-                                                totalCount: response.data.length
-                                            });
                                         })
-                                        .catch(function (error) { });
+                                        .then(response => { });
+                                    this.tableRef.current &&
+                                        this.tableRef.current.onQueryChange();
+                                    resolve();
                                 })
+                        }}
+                        options={{
+                            exportButton: true,
+                            search: true,
+                            selection: true,
+                            selectionProps: rowData => ({
+                                disabled: rowData.isFinished === "Finished",
+                                color: 'secondary'
+                            }),
+                            headerStyle: {
+                                // textAlign: 'center',
+                            },
+                            rowStyle: {
+                                textAlign: 'center',
                             }
-                            editable={{
-                                onRowAdd: newData =>
-                                    new Promise(async (resolve, reject) => {
-                                        await axios({
-                                            method: "post",
-                                            url: "http://localhost:5000/task/issue",
-                                            data: newData,
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: "Bearer " + Auth.token
-                                            }
-                                        }).catch(err => { });
-                                        this.tableRef.current &&
-                                            this.tableRef.current.onQueryChange();
-                                        resolve();
-                                    }),
-                                onRowUpdate: (newData, oldData) =>
-                                    new Promise(async (resolve, reject) => {
-                                        await axios({
-                                            method: "put",
-                                            url: "http://localhost:5000/task/issue",
-                                            data: { id: oldData._id, newData: newData },
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: "Bearer " + Auth.token
-                                            }
-                                        }).catch(err => {
-
-                                        });
-                                        this.tableRef.current &&
-                                            this.tableRef.current.onQueryChange();
-                                        resolve();
-                                    }),
-                                onRowDelete: oldData =>
-                                    new Promise(async (resolve, reject) => {
-                                        await axios
-                                            .delete("http://localhost:5000/task/issue", {
-                                                headers: {
-                                                    Authorization: "Bearer " + Auth.token
-                                                },
-                                                data: {
-                                                    id: oldData._id
-                                                }
-                                            })
-                                            .then(response => { });
-                                        this.tableRef.current &&
-                                            this.tableRef.current.onQueryChange();
-                                        resolve();
-                                    })
-                            }}
-                            options={{
-                                exportButton: true,
-                                search: true,
-                                selection: true,
-                                selectionProps: rowData => ({
-                                    disabled: rowData.isFinished === "Finished",
-                                    color: 'secondary'
-                                }),
-                                headerStyle: {
-                                    // textAlign: 'center',
-                                },
-                                rowStyle: {
-                                    textAlign: 'center',
-                                }
-                            }}
-                            detailPanel={rowData => {
-                                return (
-                                    <div className={classes.formTextEditor}>
-                                    <MUIRichTextEditor 
+                        }}
+                        detailPanel={rowData => {
+                            return (
+                                <div className={classes.formTextEditor}>
+                                    <MUIRichTextEditor
                                         label={"load texts here..."}
                                         readOnly={rowData.username !== Auth.username || rowData.executor || rowData.isFinished === "Finished"}
                                         value={rowData.description}
@@ -368,97 +367,97 @@ class EnhancedIssue extends React.Component {
                                                     Authorization: "Bearer " + Auth.token
                                                 }
                                             }).catch(err => {
-    
+
                                             });
                                             this.tableRef.current &&
                                                 this.tableRef.current.onQueryChange();
                                         }}
                                     />
-                                    </div>
-                                )
-                            }}
-                            onRowClick={(event, rowData, togglePanel) => togglePanel()}
-                            actions={[
-                                {
-                                    icon: ExitToAppIcon,
-                                    tooltip: "Logout",
-                                    isFreeAction: true,
-                                    onClick: () => Auth.signout(() => window.location.reload())
-                                },
-                                {
-                                    tooltip: 'Remove All Selected Tasks',
-                                    icon: DeleteIcon,
-                                    onClick: (evt, datax) => {
-                                        datax.map(async data => {
-                                            await axios
-                                                .delete("http://localhost:5000/task/issue", {
-                                                    headers: {
-                                                        Authorization: "Bearer " + Auth.token
-                                                    },
-                                                    data: {
-                                                        id: data._id
-                                                    }
-                                                })
-                                                .then(response => { });
-                                            this.tableRef.current && this.tableRef.current.onQueryChange();
-                                        });
-
-                                    }
-                                },
-                                {
-                                    tooltip: 'Assign Yourself to These Tasks',
-                                    icon: ShoppingCartIcon,
-                                    onClick: async (evt, datax) => {
-                                        await datax.map(async data => {
-                                            await axios({
-                                                method: "put",
-                                                url: "http://localhost:5000/task/issue",
-                                                data: {
-                                                    id: data._id, newData: {
-                                                        executor: Auth.username
-                                                    }
-                                                },
+                                </div>
+                            )
+                        }}
+                        onRowClick={(event, rowData, togglePanel) => togglePanel()}
+                        actions={[
+                            {
+                                icon: ExitToAppIcon,
+                                tooltip: "Logout",
+                                isFreeAction: true,
+                                onClick: () => Auth.signout(() => window.location.reload())
+                            },
+                            {
+                                tooltip: 'Remove All Selected Tasks',
+                                icon: DeleteIcon,
+                                onClick: (evt, datax) => {
+                                    datax.map(async data => {
+                                        await axios
+                                            .delete("http://localhost:5000/task/issue", {
                                                 headers: {
-                                                    "Content-Type": "application/json",
                                                     Authorization: "Bearer " + Auth.token
-                                                }
-                                            }).then(() => {
-
-                                            });
-                                            this.tableRef.current && this.tableRef.current.onQueryChange();
-                                        });
-
-                                    }
-                                },
-                                {
-                                    tooltip: 'Mark as Finished',
-                                    icon: AssignmentTurnedInIcon,
-                                    onClick: (evt, datax) => {
-                                        datax.map(async data => {
-                                            await axios({
-                                                method: "put",
-                                                url: "http://localhost:5000/task/issue",
-                                                data: {
-                                                    id: data._id, newData: {
-                                                        isFinished: true
-                                                    }
                                                 },
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                    Authorization: "Bearer " + Auth.token
+                                                data: {
+                                                    id: data._id
                                                 }
-                                            });
-                                            this.tableRef.current && this.tableRef.current.onQueryChange();
-                                        });
-                                    }
+                                            })
+                                            .then(response => { });
+                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+                                    });
+
                                 }
-                            ]}
-                            
-                        />
-                    </div>
-                </Container>
-                <Copyright />
-            </ThemeProvider>
+                            },
+                            {
+                                tooltip: 'Assign Yourself to These Tasks',
+                                icon: ShoppingCartIcon,
+                                onClick: async (evt, datax) => {
+                                    await datax.map(async data => {
+                                        await axios({
+                                            method: "put",
+                                            url: "http://localhost:5000/task/issue",
+                                            data: {
+                                                id: data._id, newData: {
+                                                    executor: Auth.username
+                                                }
+                                            },
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: "Bearer " + Auth.token
+                                            }
+                                        }).then(() => {
+
+                                        });
+                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+                                    });
+
+                                }
+                            },
+                            {
+                                tooltip: 'Mark as Finished',
+                                icon: AssignmentTurnedInIcon,
+                                onClick: (evt, datax) => {
+                                    datax.map(async data => {
+                                        await axios({
+                                            method: "put",
+                                            url: "http://localhost:5000/task/issue",
+                                            data: {
+                                                id: data._id, newData: {
+                                                    isFinished: true
+                                                }
+                                            },
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                                Authorization: "Bearer " + Auth.token
+                                            }
+                                        });
+                                        this.tableRef.current && this.tableRef.current.onQueryChange();
+                                    });
+                                }
+                            }
+                        ]}
+
+                    />
+                </div>
+            </Container>
+
+            // </ThemeProvider>
         );
     }
 }

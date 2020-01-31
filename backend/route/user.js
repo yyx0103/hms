@@ -41,7 +41,7 @@ router.route("/login").get((req, res) => {
 });
 
 router.route("/signup").post((req, res) => {
-    if (req.body.family && req.body.username) {
+    if (req.body.family && req.body.username && req.body.family.length > 3 && req.body.username.length > 3) {
         req.body.username = req.body.username + '@' + req.body.family;
         Family.findOne({ family: req.body.family }).then(async (doc) => {
             if (!doc) {

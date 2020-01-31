@@ -3,7 +3,8 @@ import {
     BrowserRouter as Router,
     Route,
     Redirect,
-    withRouter
+    withRouter,
+    Switch
 } from "react-router-dom";
 import CreateAccount from "./components/signup";
 import Button from "react-bootstrap/Button";
@@ -12,6 +13,8 @@ import axios from "axios";
 import EnhancedIssue from "./components/enhancedissue";
 import { createMuiTheme } from '@material-ui/core/styles';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import Dashboard from './components/board';
+import NavTabs from './components/navbar';
 
 export const Auth = {
     isAuthenticated: false,
@@ -92,15 +95,37 @@ const theme = createMuiTheme({
     }
 });
 
+const DefaultContainer = () => (
+    <div className="container">
+        <MuiThemeProvider theme={theme}>
+            {(Auth.isAuthenticated) ? <NavTabs /> : null}
+            <PrivateRoute path="/dash" component={Dashboard} />
+            <PrivateRoute path="/issue" component={EnhancedIssue} />
+        </MuiThemeProvider>
+
+    </div>
+)
+
+
+const LoginContainer = () => (
+    <div className="container">
+        <Route exact path="/" component={Login} />
+        <Route path="/login" component={Login} />
+        <Route path="/signup" component={CreateAccount} />
+    </div>
+)
+
 function App() {
     return (
         <Router>
-            <Route path="/" exact component={Login} />
-            <Route path="/login" component={Login} />
-            <MuiThemeProvider theme={theme}>
-                <PrivateRoute path="/issue" exact component={EnhancedIssue} />
-            </MuiThemeProvider>
-            <Route path="/signup" component={CreateAccount} />
+            <Switch>
+                <div className="App">
+                    <Route exact path="/" component={Login} />
+                    <Route exact path="/(login)" component={LoginContainer} />
+                    <Route exact path="/(signup)" component={LoginContainer} />
+                    <Route component={DefaultContainer} />
+                </div>
+            </Switch>
         </Router>
     );
 }
