@@ -26,10 +26,6 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-let obj2arr = (obj) => Object.keys(obj).map(function (key) {
-    return [{ username: Number(key), count: obj[key] }];
-});
-
 let groupbyCount = (arr) => {
     let dict = {};
     for (const r of arr) {
