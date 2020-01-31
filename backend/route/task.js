@@ -83,6 +83,15 @@ router.route("/issue").put((req, res) => {
                         delete req.body.newData.isFinished;
                         if (doc.username.localeCompare(task.username) === 0) {
                             // Creator is allowed to change anything except for 
+                            if (req.body.newData.title) {
+                                task.title = req.body.newData.title;
+                            }
+                            if (req.body.newData.description) {
+                                task.description = req.body.newData.description;
+                            }
+                            if (req.body.newData.dateDue) {
+                                task.dateDue = req.body.newData.dateDue;
+                            }
                             task.executor = req.body.newData.executor;
                             task.save();
                         } else {

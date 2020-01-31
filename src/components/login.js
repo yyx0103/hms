@@ -3,8 +3,8 @@ import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
-import { Link } from "react-router-dom";
-import Grid from "@material-ui/core/Grid";
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
@@ -119,9 +119,9 @@ class Login extends React.Component {
                             required
                             fullWidth
                             id="username"
-                            label="Username"
+                            label="username@family"
                             name="username"
-                            autoComplete="username@family"
+                            autoComplete="username"
                             value={this.state.username}
                             onChange={this.onChangeUsername}
                             autoFocus
@@ -132,7 +132,7 @@ class Login extends React.Component {
                             required
                             fullWidth
                             name="password"
-                            label="Password"
+                            label="password"
                             type="password"
                             id="password"
                             autoComplete="current-password"
@@ -151,7 +151,7 @@ class Login extends React.Component {
                         </Button>
                         <Grid container>
                             <Grid item>
-                                <Link to="/signup" variant="body2">
+                                <Link component={RouterLink} to="/signup" variant="body2">
                                     {"Don't have an account? Sign Up"}
                                 </Link>
                             </Grid>

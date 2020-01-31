@@ -6,7 +6,7 @@ import {
     KeyboardDatePicker,
     MuiPickersUtilsProvider
 } from "@material-ui/pickers";
-import { ThemeProvider, withStyles } from "@material-ui/core/styles";
+import { ThemeProvider, withStyles, makeStyles } from "@material-ui/core/styles";
 import axios from "axios";
 import { Auth } from "../App";
 import "typeface-roboto";
@@ -34,20 +34,9 @@ import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
+import MUIRichTextEditor from "mui-rte";
+import { MuiThemeProvider } from '@material-ui/core/styles'
 
-
-function Copyright() {
-    return (
-        <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://github.com/yyx0103">
-                Yuxin Yang
-        </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -78,23 +67,60 @@ const tableIcons = {
 
 const styles = theme => ({
     darkColor: {
-        color: theme.palette.primary.dark
+        color: theme.palette.primary.dark,
+        marginBottom: theme.spacing(3)
     },
     paper: {
         marginTop: theme.spacing(8),
-        alignItems: "center"
+        marginBottom: theme.spacing(3),
+        // alignItems: "center"
     },
     avatar: {
         margin: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main
     },
     form: {
-        marginTop: theme.spacing(3)
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3)
+    },
+    formTextEditor: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3),
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(3),
     },
     submit: {
         margin: theme.spacing(3, 0, 2)
+    },
+    MUIRichTextEditor: {
+        root: {
+            marginTop: 20,
+            marginLeft: 50,
+            width: "80%"
+        },
+        editor: {
+            borderBottom: "1px solid gray" 
+        }
     }
 });
+
+const useStyles = makeStyles(styles);
+
+function Copyright() {
+    const classes = useStyles();
+    return (
+        <div className={classes.form}>
+            <Typography variant="body2" color="textSecondary" align="center">
+                {"Copyright Â© "}
+                <Link color="inherit" href="https://github.com/yyx0103">
+                    Yuxin Yang
+            </Link>{' '}
+                {new Date().getFullYear()}
+                {'.'}
+            </Typography>
+        </div>
+    );
+}
 
 class EnhancedIssue extends React.Component {
     tableRef = React.createRef();
@@ -114,15 +140,15 @@ class EnhancedIssue extends React.Component {
                     field: "title",
                 },
                 {
-                    title: "Description",
-                    field: "description",
-                },
-                {
                     title: "Exec",
                     field: "executor",
                     editable: "never"
                 },
-
+                {
+                    title: "Status",
+                    field: "isFinished",
+                    editable: "never"
+                },
                 {
                     title: "Date Due",
                     field: "dateDue",
@@ -156,14 +182,15 @@ class EnhancedIssue extends React.Component {
                                 <Grid container justify="space-around">
                                     <KeyboardDatePicker
                                         disableToolbar
-                                        variant="dialog"
+                                        variant="inline"
                                         format="MM/dd/yyyy"
                                         margin="none"
                                         fullWidth={false}
-                                        disabled={props.isFinished || props.executor}
                                         id="date-picker-inline"
-                                        value={props.dateDue}
-                                        onChange={date => props.onChange(date)}
+                                        value={props.value}
+                                        onChange={date => {
+                                            props.onChange(date);
+                                        }}
                                         KeyboardButtonProps={{
                                             "aria-label": "change date",
                                             disabled: props.isFinished || props.executor,
@@ -174,12 +201,7 @@ class EnhancedIssue extends React.Component {
                             </MuiPickersUtilsProvider>
                         );
                     }
-                }, {
-                    title: "Status",
-                    field: "isFinished",
-                    editable: "never"
-                },
-
+                }
             ],
             data: []
         };
@@ -222,6 +244,7 @@ class EnhancedIssue extends React.Component {
                                                 if (e.executor) {
                                                     e.executor = e.executor.substr(0, e.executor.indexOf("@"));
                                                 }
+                                                return e;
                                             });
                                             let retdata = [];
                                             if (!query.search || query.search.length < 1) {
@@ -321,12 +344,40 @@ class EnhancedIssue extends React.Component {
                                     color: 'secondary'
                                 }),
                                 headerStyle: {
-                                    textAlign: 'center',
+                                    // textAlign: 'center',
                                 },
                                 rowStyle: {
                                     textAlign: 'center',
                                 }
                             }}
+                            detailPanel={rowData => {
+                                return (
+                                    <div className={classes.formTextEditor}>
+                                    <MUIRichTextEditor 
+                                        label={"load texts here..."}
+                                        readOnly={rowData.username !== Auth.username || rowData.executor || rowData.isFinished === "Finished"}
+                                        value={rowData.description}
+                                        onSave={async (data) => {
+                                            rowData.description = data;
+                                            await axios({
+                                                method: "put",
+                                                url: "http://localhost:5000/task/issue",
+                                                data: { id: rowData._id, newData: rowData },
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                    Authorization: "Bearer " + Auth.token
+                                                }
+                                            }).catch(err => {
+    
+                                            });
+                                            this.tableRef.current &&
+                                                this.tableRef.current.onQueryChange();
+                                        }}
+                                    />
+                                    </div>
+                                )
+                            }}
+                            onRowClick={(event, rowData, togglePanel) => togglePanel()}
                             actions={[
                                 {
                                     icon: ExitToAppIcon,
@@ -402,9 +453,11 @@ class EnhancedIssue extends React.Component {
                                     }
                                 }
                             ]}
+                            
                         />
                     </div>
                 </Container>
+                <Copyright />
             </ThemeProvider>
         );
     }

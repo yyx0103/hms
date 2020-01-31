@@ -95,12 +95,12 @@ const theme = createMuiTheme({
 function App() {
     return (
         <Router>
+            <Route path="/" exact component={Login} />
             <Route path="/login" component={Login} />
-            <Route path="/signup" component={CreateAccount} />
             <MuiThemeProvider theme={theme}>
                 <PrivateRoute path="/issue" exact component={EnhancedIssue} />
             </MuiThemeProvider>
-            <Route path="/" exact component={Login} />
+            <Route path="/signup" component={CreateAccount} />
         </Router>
     );
 }
