@@ -50,12 +50,11 @@ router.route("/issue").delete((req, res) => {
             _id: new mongoose.Types.ObjectId(req.body.id),
             username: doc.username,
             family: doc.family
-        }).catch(err => {
-            res.status(400).json(err);
+        }).then(e => res.status(200).json({})).catch(err => {
+            res.status(400).json("no such task of you exist");
         });
-        res.status(200).json({});
     }).catch(err => {
-        res.status(400).json(err);
+        res.status(400).json({ err: "authorization failed" });
     });
 });
 
@@ -69,7 +68,7 @@ router.route("/issue").put((req, res) => {
         },
         (err, doc) => {
             if (err || !req.body.id) {
-                res.status(400).json(err);
+                res.status(400).json({ err: "authorization failed" });
                 return;
             }
             Task.findOne({ _id: req.body.id, family: doc.family }).then((task) => {
@@ -93,7 +92,7 @@ router.route("/issue").put((req, res) => {
                                 task.dateDue = req.body.newData.dateDue;
                             }
                             task.executor = req.body.newData.executor;
-                            task.save();
+                            task.save().catch(e => res.status(400).json({ err: "task not successfully saved" }));
                         } else {
                             // Non-creator is only allowed to make assignment to a Family Member
                             if (req.body.newData.executor) {
@@ -101,7 +100,9 @@ router.route("/issue").put((req, res) => {
                                 delete req.body.newData.description;
                                 delete req.body.newData.dateDue;
                                 task.executor = req.body.newData.executor;
-                                task.save();
+                                task.save().catch(e => res.status(400).json({ err: "task not successfully saved" }));
+                            } else {
+                                res.status(400).json({ err: "you cannot change task created by other people" });
                             }
                         }
                     } else {
@@ -109,13 +110,17 @@ router.route("/issue").put((req, res) => {
                         // Task could only be toggled to Finished at the state "assigned"
                         if (req.body.newData.isFinished && doc.username.localeCompare(task.executor) === 0) {
                             task.isFinished = true;
-                            task.save();
+                            task.save().catch(e => res.status(400).json({ err: "task not successfully saved" }));
+                        } else {
+                            res.status(400).json({ err: "you cannot change task while someone is executing it" });
                         }
                     }
+                } else {
+                    res.status(400).json({ err: "task should not be modified if archived" });
                 }
                 // State: Finished (Archived)
                 res.json(task);
-            });
+            }).catch(e => res.status(400).json({ err: "no such task exist in your family" }));
         }
     );
 });

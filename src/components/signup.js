@@ -94,7 +94,7 @@ export class CreateAccount extends Component {
         e.preventDefault();
         await axios({
             method: "post",
-            url: "http://localhost:5000/user/signup",
+            url: "/user/signup",
             data: {
                 username: this.state.username,
                 password: this.state.password,

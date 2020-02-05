@@ -22,7 +22,7 @@ export const Auth = {
     username: "",
     async authenticate(userinfo, next) {
         await axios
-            .get("http://localhost:5000/user/login", { headers: userinfo })
+            .get("/user/login", { headers: userinfo })
             .then(res => {
                 if (res.data.success) {
                     this.token = res.data.token;

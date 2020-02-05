@@ -208,7 +208,7 @@ class EnhancedIssue extends React.Component {
 
     async componentDidMount() {
         await axios
-            .get("http://localhost:5000/user/", {
+            .get("/user/", {
                 headers: { Authorization: "Bearer " + Auth.token }
             })
             .then(user => {
@@ -233,7 +233,7 @@ class EnhancedIssue extends React.Component {
                         data={async query =>
                             new Promise(async (resolve, reject) => {
                                 await axios
-                                    .get("http://localhost:5000/task/", {
+                                    .get("/task/", {
                                         headers: { Authorization: "Bearer " + Auth.token }
                                     })
                                     .then(response => {
@@ -289,7 +289,7 @@ class EnhancedIssue extends React.Component {
                                 new Promise(async (resolve, reject) => {
                                     await axios({
                                         method: "post",
-                                        url: "http://localhost:5000/task/issue",
+                                        url: "/task/issue",
                                         data: newData,
                                         headers: {
                                             "Content-Type": "application/json",
@@ -304,7 +304,7 @@ class EnhancedIssue extends React.Component {
                                 new Promise(async (resolve, reject) => {
                                     await axios({
                                         method: "put",
-                                        url: "http://localhost:5000/task/issue",
+                                        url: "/task/issue",
                                         data: { id: oldData._id, newData: newData },
                                         headers: {
                                             "Content-Type": "application/json",
@@ -320,7 +320,7 @@ class EnhancedIssue extends React.Component {
                             onRowDelete: oldData =>
                                 new Promise(async (resolve, reject) => {
                                     await axios
-                                        .delete("http://localhost:5000/task/issue", {
+                                        .delete("/task/issue", {
                                             headers: {
                                                 Authorization: "Bearer " + Auth.token
                                             },
@@ -360,7 +360,7 @@ class EnhancedIssue extends React.Component {
                                             rowData.description = data;
                                             await axios({
                                                 method: "put",
-                                                url: "http://localhost:5000/task/issue",
+                                                url: "/task/issue",
                                                 data: { id: rowData._id, newData: rowData },
                                                 headers: {
                                                     "Content-Type": "application/json",
@@ -390,7 +390,7 @@ class EnhancedIssue extends React.Component {
                                 onClick: (evt, datax) => {
                                     datax.map(async data => {
                                         await axios
-                                            .delete("http://localhost:5000/task/issue", {
+                                            .delete("/task/issue", {
                                                 headers: {
                                                     Authorization: "Bearer " + Auth.token
                                                 },
@@ -411,7 +411,7 @@ class EnhancedIssue extends React.Component {
                                     await datax.map(async data => {
                                         await axios({
                                             method: "put",
-                                            url: "http://localhost:5000/task/issue",
+                                            url: "/task/issue",
                                             data: {
                                                 id: data._id, newData: {
                                                     executor: Auth.username
@@ -436,7 +436,7 @@ class EnhancedIssue extends React.Component {
                                     datax.map(async data => {
                                         await axios({
                                             method: "put",
-                                            url: "http://localhost:5000/task/issue",
+                                            url: "/task/issue",
                                             data: {
                                                 id: data._id, newData: {
                                                     isFinished: true

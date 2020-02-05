@@ -47,7 +47,7 @@ export default function HallOfFame() {
     const [hof, setHof] = useState([]);
     useEffect(() => {
         // Update the document title using the browser API
-        axios.get("http://localhost:5000/task/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
+        axios.get("/task/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
 
             let dictExec = groupbyCount(response.data.filter(o => o.executor && o.isFinished).map(o => { return o.executor; }));
             let dictUser = (response.data.reduce((acc, it) => {

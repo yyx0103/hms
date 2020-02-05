@@ -42,7 +42,7 @@ export default function UserStats() {
     const [info, setInfo] = React.useState([]);
 
     React.useEffect(() => {
-        axios.get("http://localhost:5000/task/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
+        axios.get("/task/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
             let dictExec = response.data.filter(o => o.executor && o.isFinished).map(o => { return o.executor; });
             let youFinished = dictExec.filter(o => { return o === Auth.username; }).length;
             let dictIss = response.data.filter(o => o.executor && !o.isFinished).map(o => { return o.executor; });

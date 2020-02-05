@@ -31,7 +31,7 @@ export default function FamilyList() {
     const [members, setMembers] = useState([]);
     useEffect(() => {
         // Update the document title using the browser API
-        axios.get("http://localhost:5000/user/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
+        axios.get("/user/", { headers: { Authorization: "Bearer " + Auth.token } }).then((response) => {
             setMembers(response.data.member);
         }).catch((err) => { });
     });
