@@ -1,5 +1,10 @@
 # 🐑的任务板
 # 🐑's Task Board
+## Available From
+https://yang-hms.herokuapp.com/
+- User Name ```yangyuxin@2061stan```
+- User Password ```0526```
+- Might be shut down by Heroku but just need to warm within 0.5 min
 
 ## Available Scripts
 
